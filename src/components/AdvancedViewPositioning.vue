@@ -1,14 +1,19 @@
 <template>
   <div class="MapView">
-    <button @click="zoomtoswitzerland">放大到宜宾</button> (最合适).<br />
+    <h6>
+      此示例演示了如何调整地图视图，以便将几何图形或坐标定位在特定的像素位置。
+    </h6>
+    <button @click="zoomtoswitzerland">放大到瑞士</button> (最合适).<br />
     <button @click="zoomtolausanne">放大到洛桑</button> (以最小分辨率),<br />
-    <button @click="centerlausanne">珙县中心</button>
+    <button @click="centerlausanne">洛桑中心</button>
     <div class="mapcontainer">
       <div id="map" class="map"></div>
+      <!-- 地图在视口内部应用了上，右，下和左填充 -->
       <div class="padding-top"></div>
       <div class="padding-left"></div>
       <div class="padding-right"></div>
       <div class="padding-bottom"></div>
+      <!-- 地图在视口内部应用了上，右，下和左填充 -->
       <div class="center"></div>
     </div>
   </div>
@@ -46,33 +51,45 @@ export default {
           features: [
             {
               type: "Feature",
-              properties: {},
+              id: "CHE",
+              properties: { name: "Switzerland" },
               geometry: {
                 type: "Polygon",
                 coordinates: [
                   [
-                    [104.62692260742188, 28.80978350470993],
-                    [104.4140625, 28.58693349906797],
-                    [104.5513916015625, 28.33702142319534],
-                    [104.57061767578125, 28.283823966106382],
-                    [104.86312866210938, 28.37327715450343],
-                    [105.05813598632812, 28.494040075666316],
-                    [105.01693725585938, 28.63997865130685],
-                    [104.7491455078125, 28.548338387631425],
-                    [104.82879638671875, 28.776085346816238],
-                    [104.66400146484375, 28.680949728554964],
-                    [104.62692260742188, 28.80978350470993]
+                    [9.594226, 47.525058],
+                    [9.632932, 47.347601],
+                    [9.47997, 47.10281],
+                    [9.932448, 46.920728],
+                    [10.442701, 46.893546],
+                    [10.363378, 46.483571],
+                    [9.922837, 46.314899],
+                    [9.182882, 46.440215],
+                    [8.966306, 46.036932],
+                    [8.489952, 46.005151],
+                    [8.31663, 46.163642],
+                    [7.755992, 45.82449],
+                    [7.273851, 45.776948],
+                    [6.843593, 45.991147],
+                    [6.5001, 46.429673],
+                    [6.022609, 46.27299],
+                    [6.037389, 46.725779],
+                    [6.768714, 47.287708],
+                    [6.736571, 47.541801],
+                    [7.192202, 47.449766],
+                    [7.466759, 47.620582],
+                    [8.317301, 47.61358],
+                    [8.522612, 47.830828],
+                    [9.594226, 47.525058]
                   ]
                 ]
               }
             },
             {
               type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: [104.69558715820312, 28.455410938077357]
-              }
+              id: "LSNE",
+              properties: { name: "Lausanne" },
+              geometry: { type: "Point", coordinates: [6.6339863, 46.5193823] }
             }
           ]
         })
@@ -123,22 +140,30 @@ export default {
       let polygon = feature.getGeometry();
       console.log("zoomtoswitzerland-size", this.map.getSize());
       // fit()根据给定的地图大小和边界，适合给定的几何形状或范围。
-      this.view.fit(polygon, {
-        padding: [170, 50, 30, 150],
-        backgroundColor: "red"
-      });
+      // padding:设置到地图容器边距
+      this.view.fit(polygon, { padding: [170, 50, 30, 150] });
     },
     zoomtolausanne() {
       let feature = this.source.getFeatures()[1];
       let point = feature.getGeometry();
       console.log("zoomtolausanne-size", this.map.getSize());
+      // minResolution：图层的最小分辨率，小于这个分辨率的瓦片不会被加载
       this.view.fit(point, { padding: [170, 50, 30, 150], minResolution: 50 });
     },
     centerlausanne() {
-      let feature = this.source.getFeatures()[1];
-      let point = feature.getGeometry();
-      console.log("centerlausanne-size", this.map.getSize());
+      let featurePoint = this.source.getFeatures()[1];
+      let point = featurePoint.getGeometry();
+      let featurePolygon = this.source.getFeatures()[0];
+      let polygon = featurePolygon.getGeometry();
+      console.log(
+        "centerlausanne-size",
+        this.map.getSize(),
+        point.getCoordinates()
+      );
       let size = this.map.getSize();
+      this.view.fit(polygon, { padding: [170, 50, 30, 150] });
+      // centerOn()用于将坐标（Lausanne）定位在特定像素位置（黑框的中心）。
+      // point.getCoordinates()返回点的坐标
       this.view.centerOn(point.getCoordinates(), size, [570, 500]);
     }
   }
