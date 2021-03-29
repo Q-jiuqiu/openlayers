@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OPenLayers 3 example</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/css/ol.css"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/build/ol.js"></script>
+    <style>
+      #map {
+        width: 100%;
+        height: 500px;
+      }
+      ul li {
+        list-style: none;
+      }
+      .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+        filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 350px;
+      }
+      .ol-popup:after,
+      .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+      }
+      .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+      }
+      .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+      }
+      .ol-popup-closer:after {
+        content: "✖";
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content">
+        <ul id="message"></ul>
+      </div>
+    </div>
+    <form class="form-inline">
+      <label>Geometry type &nbsp;</label>
+      <select name="" id="type">
+        <option value="Point">Point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+        <option value="Circle">Circle</option>
+        <option value="None">None</option>
+      </select>
+    </form>
+    <button id="btn">Bezier</button>
+    <!--<canvas id="myCanvas" width="500" height="400" style="border: 1px solid-->
+    <!--#000;"></canvas>-->
+
+    <script type="text/javascript">
+      var container = document.getElementById("popup");
+      var content = document.getElementById("popup-content");
+      var closer = document.getElementById("popup-closer");
+      //    创建一个叠加层，将弹出式窗口定位到地图。
+      var overlay = new ol.Overlay(
+        /** @type {olx.OverlayOptions}*/ ({
+          element: container,
+          autoPan: true,
+          autoPanAnimation: {
+            duration: 250
+          }
+        })
+      );
+      //    点击关闭按钮  关闭弹窗
+      closer.onclick = function() {
+        //不显示弹出框
+        overlay.setPosition(undefined);
+        closer.blur();
+        return false;
+      };
+      // 创建一个使用Open Street Map地图源的瓦片图层
+      var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+      var source = new ol.source.Vector({ wrapX: false });
+      //ol.layer.Vector用于显示在客户端渲染的矢量数据。
+      var vector = new ol.layer.Vector({
+        source: source
+      });
+
+      //地图部分
+      var map = new ol.Map({
+        //设置地图图层
+        layers: [raster, vector],
+        // 让id为map的div作为地图的容器
+        target: "map",
+        // overlays: [overlay],
+        // 设置显示地图的视图
+        view: new ol.View({
+          center: [-11000000, 4600000], // 定义地图显示中心
+          zoom: 4 //缩放层级
+        })
+        // controls: ol.control.defaults({
+        //   attributionOptions: {
+        //     collapsible: false
+        //   }
+        // })
+      });
+
+      //下拉列表切换
+      var typeSelect = document.getElementById("type");
+      //添加形状的函数
+      var draw;
+      function addInteraction() {
+        var value = typeSelect.value;
+        if (value !== "None") {
+          //ol.interaction.Draw该类允许用户在地图上绘制一些几何图形，
+          // 可以通过构造方法设置type属性来指写是绘制哪种几何图形。目前支持点，线，多边形，圆形。
+          draw = new ol.interaction.Draw({
+            source: source,
+            type: /** @type {ol.geom.GeometryType} */ (typeSelect.value)
+          });
+          map.addInteraction(draw);
+        }
+      }
+      typeSelect.onchange = function() {
+        map.removeInteraction(draw);
+        addInteraction();
+      };
+      addInteraction();
+      // 向地图中添加点击处理程序以呈现弹出式窗口。
+      map.on("click", function(evt) {
+        //坐标
+        var coordinate = evt.coordinate;
+        console.log(coordinate);
+        // ol.proj.transform(coordinate, source, destination)来转换不同的坐标点，
+        // 比如，将地理坐标系108.4，23.7转换成墨卡托坐标系
+        var hdms = ol.coordinate.toStringHDMS(
+          ol.proj.transform(coordinate, "EPSG:3857", "EPSG:4326")
+        );
+        content.innerHTML =
+          "<ul>" +
+          "<li>" +
+          "坐标系：" +
+          "<span>" +
+          "<code>" +
+          hdms +
+          "</code>" +
+          "</span>" +
+          "</li>" +
+          "</ul>";
+        overlay.setPosition(coordinate);
+      });
+    </script>
+  </body>
+</html>
