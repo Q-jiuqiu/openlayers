@@ -5,8 +5,8 @@
     <!-- <homemap></homemap> -->
     <!-- <accessible-map></accessible-map> -->
     <!-- <advanced-view-positioning></advanced-view-positioning> -->
-    <!-- <drawinmap></drawinmap> -->
-    <index></index>
+    <drawinmap></drawinmap>
+    <!-- <index></index> -->
   </div>
 </template>
 

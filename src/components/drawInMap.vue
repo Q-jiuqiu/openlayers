@@ -10,6 +10,7 @@
         <option value="None">None</option>
       </select></label
     >
+    <button @click="handleDelete">删除</button>
     <div class="MapBox">
       <div id="map" class="map"></div>
       <div id="popup" class="popup"></div>
@@ -77,11 +78,16 @@ export default {
       });
     },
     initDraw() {
+      this.handleDelete();
       this.draw = new Draw({
         source: this.source,
         type: this.type
       });
       this.map.addInteraction(this.draw);
+    },
+    handleDelete() {
+      console.log("delete");
+      this.source.clear(true);
     }
   }
 };
